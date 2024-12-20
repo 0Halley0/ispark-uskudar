@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üsküdar Parking Lots</title>
+</head>
+<body>
+    <h1>Üsküdar Parking Lots</h1>
+    
+    {% if ispark_data %}
+        <ul>
+            {% for park in ispark_data %}
+                <li>
+                    <strong>{{ park['parkName'] }}</strong><br>
+                    Location: {{ park['lat'] }}, {{ park['lng'] }}<br>
+                    Capacity: {{ park['capacity'] }}<br>
+                    Available Capacity: {{ park['emptyCapacity'] }}<br>
+                    Type: {{ park['parkType'] }}<br>
+                    Open: {% if park['isOpen'] == 1 %} Yes {% else %} No {% endif %}<br>
+                    Work Hours: {{ park['workHours'] }}<br>
+                    Free Time: {{ park['freeTime'] }} minutes<br>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No data available. Please try again later.</p>
+    {% endif %}
+</body>
+</html>
