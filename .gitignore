@@ -24,3 +24,14 @@ node_modules/
 
 # Compiled static files
 dist/
+
+# Env
+.env
+
+# Docker files
+docker-compose.override.yml
+.docker/
+*.env
+*.log
+Dockerfile
+docker-compose.yml

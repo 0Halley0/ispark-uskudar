@@ -1,30 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Üsküdar Parking Lots</title>
-</head>
-<body>
+    <script>
+      async function submitForm(event) {
+        event.preventDefault();
+
+        const lat = parseFloat(document.getElementById("lat").value);
+        const lng = parseFloat(document.getElementById("lng").value);
+        const data = { lat: lat, lng: lng };
+
+        try {
+          const response = await fetch("/nearest-parking", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch nearest parking");
+          }
+
+          const responseData = await response.json();
+          console.log("Response Data:", responseData); // Log the entire response
+
+          // Store the fetched parking lots in a global variable
+          if (responseData && responseData.data) {
+            window.nearestParkingLots = responseData.data.map((park) => ({
+              ...park,
+              lat: parseFloat(park.lat),
+              lng: parseFloat(park.lng),
+            }));
+            console.log("Nearest Parking Lots:", window.nearestParkingLots);
+          } else {
+            console.error("No nearest parking lots found in the response");
+            return;
+          }
+
+          // Populate parking lots on the page
+          const parkingList = document.getElementById("parking-list");
+          parkingList.innerHTML = ""; // Clear previous results
+          if (window.nearestParkingLots.length === 0) {
+            parkingList.innerHTML = "<li>No parking lots found nearby.</li>";
+          } else {
+            window.nearestParkingLots.forEach((park) => {
+              const listItem = document.createElement("li");
+              listItem.innerHTML = `
+            <strong>${park.parkName}</strong><br />
+            Location: ${park.lat}, ${park.lng}<br />
+            Capacity: ${park.capacity}<br />
+            Available Capacity: ${park.emptyCapacity}<br />
+            Type: ${park.parkType}<br />
+          `;
+              parkingList.appendChild(listItem);
+            });
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      async function fetchDriveInfo() {
+        if (
+          !window.nearestParkingLots ||
+          window.nearestParkingLots.length === 0
+        ) {
+          alert("Please fetch the nearest parking lots first!");
+          return;
+        }
+
+        const lat = parseFloat(document.getElementById("lat").value);
+        const lng = parseFloat(document.getElementById("lng").value);
+        const data = {
+          lat: lat,
+          lng: lng,
+          parkingLots: window.nearestParkingLots,
+        };
+
+        try {
+          const response = await fetch("/drive-info", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch driving info");
+          }
+
+          const responseData = await response.json();
+          console.log("Driving Info:", responseData);
+
+          // Update the parking list with driving info
+          const parkingList = document.getElementById("parking-list");
+          parkingList.innerHTML = ""; // Clear previous results
+          responseData.enriched_parking_lots.forEach((park) => {
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `
+          <strong>${park.parkName}</strong><br />
+          Location: ${park.lat}, ${park.lng}<br />
+          Capacity: ${park.capacity}<br />
+          Available Capacity: ${park.emptyCapacity}<br />
+          Type: ${park.parkType}<br />
+          Drive Distance: ${
+            park.driveDistance ? `${park.driveDistance.toFixed(2)} km` : "N/A"
+          }<br />
+          Drive Time: ${
+            park.driveTime ? `${park.driveTime.toFixed(2)} minutes` : "N/A"
+          }<br />
+        `;
+            parkingList.appendChild(listItem);
+          });
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+    </script>
+  </head>
+  <body>
     <h1>Üsküdar Parking Lots</h1>
-    
+
+    <form onsubmit="submitForm(event)">
+      <label for="lat">Latitude: </label>
+      <input type="number" step="any" name="lat" id="lat" required />
+      <label for="lng">Longitude: </label>
+      <input type="number" step="any" name="lng" id="lng" required />
+      <button type="submit">Find Nearest Parking Lots</button>
+    </form>
+
+    <button onclick="fetchDriveInfo()">Get Driving Info</button>
+
+    <ul id="parking-list">
+      <!-- Parking lots will be displayed here -->
+    </ul>
+
     {% if ispark_data %}
-        <ul>
-            {% for park in ispark_data %}
-                <li>
-                    <strong>{{ park['parkName'] }}</strong><br>
-                    Location: {{ park['lat'] }}, {{ park['lng'] }}<br>
-                    Capacity: {{ park['capacity'] }}<br>
-                    Available Capacity: {{ park['emptyCapacity'] }}<br>
-                    Type: {{ park['parkType'] }}<br>
-                    Open: {% if park['isOpen'] == 1 %} Yes {% else %} No {% endif %}<br>
-                    Work Hours: {{ park['workHours'] }}<br>
-                    Free Time: {{ park['freeTime'] }} minutes<br>
-                </li>
-            {% endfor %}
-        </ul>
+    <ul>
+      {% for park in ispark_data %}
+      <li>
+        <strong>{{ park['parkName'] }}</strong><br />
+        Location: {{ park['lat'] }}, {{ park['lng'] }}<br />
+        Capacity: {{ park['capacity'] }}<br />
+        Available Capacity: {{ park['emptyCapacity'] }}<br />
+        Type: {{ park['parkType'] }}<br />
+        Open: {% if park['isOpen'] == 1 %} Yes {% else %} No {% endif %}<br />
+        Work Hours: {{ park['workHours'] }}<br />
+        Free Time: {{ park['freeTime'] }} minutes<br />
+        District: {{ park['district'] }}<br />
+      </li>
+      {% endfor %}
+    </ul>
     {% else %}
-        <p>No data available. Please try again later.</p>
+    <p>No data available. Please try again later.</p>
     {% endif %}
-</body>
+  </body>
 </html>
