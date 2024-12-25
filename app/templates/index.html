@@ -3,7 +3,143 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Üsküdar Parking Lots</title>
+    <title>ISPARK DATA</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="container my-5">
+      <h1 class="text-center mb-4">ISPARK</h1>
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Filters</h5>
+          <form id="filter-form">
+            <div class="form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="filter-empty-capacity"
+              />
+              <label class="form-check-label" for="filter-empty-capacity">
+                Empty Capacity > 0
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="filter-is-open"
+              />
+              <label class="form-check-label" for="filter-is-open"
+                >Is Open</label
+              >
+            </div>
+            <div class="form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="filter-free-time"
+              />
+              <label class="form-check-label" for="filter-free-time">
+                Free Time > 0
+              </label>
+            </div>
+            <button
+              type="button"
+              class="btn btn-primary mt-3"
+              onclick="applyFilters()"
+            >
+              Apply Filters
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <form
+            id="coordinates-form"
+            class="row g-3"
+            onsubmit="submitForm(event)"
+          >
+            <div class="col-md-5">
+              <label for="lat" class="form-label">Latitude</label>
+              <input
+                type="number"
+                step="any"
+                class="form-control"
+                id="lat"
+                name="lat"
+                required
+              />
+            </div>
+            <div class="col-md-5">
+              <label for="lng" class="form-label">Longitude</label>
+              <input
+                type="number"
+                step="any"
+                class="form-control"
+                id="lng"
+                name="lng"
+                required
+              />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100">
+                Find Nearby
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="text-center mb-4">
+        <button class="btn btn-secondary" onclick="fetchDriveInfo()">
+          Get Drive Info
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title mb-3">Parking Lots</h2>
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Name</th>
+                <th>Location (Lat, Lng)</th>
+                <th>Capacity</th>
+                <th>Available Capacity</th>
+                <th>Type</th>
+                <th>District</th>
+                <th>Free Time</th>
+                <th>Is Open</th>
+                <th>Drive Distance (km)</th>
+                <th>Drive Time (min)</th>
+              </tr>
+            </thead>
+            <tbody id="parking-table-body">
+              {% for park in ispark_data %}
+              <tr>
+                <td>{{ park.parkName }}</td>
+                <td>{{ park.lat }}, {{ park.lng }}</td>
+                <td>{{ park.capacity }}</td>
+                <td>{{ park.emptyCapacity }}</td>
+                <td>{{ park.parkType }}</td>
+                <td>{{ park.district }}</td>
+                <td>{{ park.freeTime }}</td>
+                <td>{{ park.isOpen }}</td>
+                <td>N/A</td>
+                <td>N/A</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <script>
       async function submitForm(event) {
         event.preventDefault();
@@ -26,37 +162,42 @@
           }
 
           const responseData = await response.json();
-          console.log("Response Data:", responseData); // Log the entire response
+          console.log("Response Data:", responseData);
 
-          // Store the fetched parking lots in a global variable
           if (responseData && responseData.data) {
             window.nearestParkingLots = responseData.data.map((park) => ({
               ...park,
               lat: parseFloat(park.lat),
               lng: parseFloat(park.lng),
             }));
-            console.log("Nearest Parking Lots:", window.nearestParkingLots);
           } else {
             console.error("No nearest parking lots found in the response");
             return;
           }
 
-          // Populate parking lots on the page
-          const parkingList = document.getElementById("parking-list");
-          parkingList.innerHTML = ""; // Clear previous results
+          const tableBody = document.getElementById("parking-table-body");
+          tableBody.innerHTML = "";
           if (window.nearestParkingLots.length === 0) {
-            parkingList.innerHTML = "<li>No parking lots found nearby.</li>";
+            const row = document.createElement("tr");
+            row.innerHTML =
+              '<td colspan="7" class="text-center">No parking lots found nearby.</td>';
+            tableBody.appendChild(row);
           } else {
             window.nearestParkingLots.forEach((park) => {
-              const listItem = document.createElement("li");
-              listItem.innerHTML = `
-            <strong>${park.parkName}</strong><br />
-            Location: ${park.lat}, ${park.lng}<br />
-            Capacity: ${park.capacity}<br />
-            Available Capacity: ${park.emptyCapacity}<br />
-            Type: ${park.parkType}<br />
-          `;
-              parkingList.appendChild(listItem);
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                            <td>${park.parkName}</td>
+                            <td>${park.lat}, ${park.lng}</td>
+                            <td>${park.capacity}</td>
+                            <td>${park.emptyCapacity}</td>
+                            <td>${park.parkType}</td>
+                            <td>${park.district}</td>
+                            <td>${park.freeTime}</td>
+                            <td>${park.isOpen}</td>
+                            <td>N/A</td>
+                            <td>N/A</td>
+                        `;
+              tableBody.appendChild(row);
             });
           }
         } catch (error) {
@@ -97,67 +238,34 @@
           const responseData = await response.json();
           console.log("Driving Info:", responseData);
 
-          // Update the parking list with driving info
-          const parkingList = document.getElementById("parking-list");
-          parkingList.innerHTML = ""; // Clear previous results
+          const tableBody = document.getElementById("parking-table-body");
+          tableBody.innerHTML = "";
           responseData.enriched_parking_lots.forEach((park) => {
-            const listItem = document.createElement("li");
-            listItem.innerHTML = `
-          <strong>${park.parkName}</strong><br />
-          Location: ${park.lat}, ${park.lng}<br />
-          Capacity: ${park.capacity}<br />
-          Available Capacity: ${park.emptyCapacity}<br />
-          Type: ${park.parkType}<br />
-          Drive Distance: ${
-            park.driveDistance ? `${park.driveDistance.toFixed(2)} km` : "N/A"
-          }<br />
-          Drive Time: ${
-            park.driveTime ? `${park.driveTime.toFixed(2)} minutes` : "N/A"
-          }<br />
-        `;
-            parkingList.appendChild(listItem);
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                        <td>${park.parkName}</td>
+                        <td>${park.lat}, ${park.lng}</td>
+                        <td>${park.capacity}</td>
+                        <td>${park.emptyCapacity}</td>
+                        <td>${park.parkType}</td>
+                        <td>${park.district}</td>
+                        <td>${park.freeTime}</td>
+                        <td>${park.isOpen}</td>
+                        <td>${
+                          park.driveDistance
+                            ? park.driveDistance.toFixed(2)
+                            : "N/A"
+                        }</td>
+                        <td>${
+                          park.driveTime ? park.driveTime.toFixed(2) : "N/A"
+                        }</td>
+                    `;
+            tableBody.appendChild(row);
           });
         } catch (error) {
           console.error("Error:", error);
         }
       }
     </script>
-  </head>
-  <body>
-    <h1>Üsküdar Parking Lots</h1>
-
-    <form onsubmit="submitForm(event)">
-      <label for="lat">Latitude: </label>
-      <input type="number" step="any" name="lat" id="lat" required />
-      <label for="lng">Longitude: </label>
-      <input type="number" step="any" name="lng" id="lng" required />
-      <button type="submit">Find Nearest Parking Lots</button>
-    </form>
-
-    <button onclick="fetchDriveInfo()">Get Driving Info</button>
-
-    <ul id="parking-list">
-      <!-- Parking lots will be displayed here -->
-    </ul>
-
-    {% if ispark_data %}
-    <ul>
-      {% for park in ispark_data %}
-      <li>
-        <strong>{{ park['parkName'] }}</strong><br />
-        Location: {{ park['lat'] }}, {{ park['lng'] }}<br />
-        Capacity: {{ park['capacity'] }}<br />
-        Available Capacity: {{ park['emptyCapacity'] }}<br />
-        Type: {{ park['parkType'] }}<br />
-        Open: {% if park['isOpen'] == 1 %} Yes {% else %} No {% endif %}<br />
-        Work Hours: {{ park['workHours'] }}<br />
-        Free Time: {{ park['freeTime'] }} minutes<br />
-        District: {{ park['district'] }}<br />
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>No data available. Please try again later.</p>
-    {% endif %}
   </body>
 </html>

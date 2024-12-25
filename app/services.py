@@ -3,6 +3,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import time
 from math import radians, sin, cos, sqrt, atan2
 import openrouteservice
+#from app.models import ParkingLot
 from config import Config
 import logging
 
@@ -12,6 +13,7 @@ ORS_CLIENT = openrouteservice.Client(key=Config.OPENROUTESERVICE_API_KEY)
 
 cached_ispark_data = None
 nearby_parking_cache = {}
+
 
 def fetch_ispark_data():
     global cached_ispark_data
@@ -86,6 +88,8 @@ def get_parking_within_radius(lat, lng, radius=5, limit=10):
                     "workHours": park["workHours"],
                     "parkType": park["parkType"],
                     "district": park["district"],
+                    "freeTime": park["freeTime"],
+                    "isOpen": park["isOpen"],
                     "distance": distance,
                 }
             )
@@ -125,3 +129,4 @@ def get_drive_info(lat, lng, parking_lots):
         )
 
     return enriched_parking_lots
+
