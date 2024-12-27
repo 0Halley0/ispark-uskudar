@@ -3,10 +3,19 @@ from app.services import fetch_ispark_data, get_parking_within_radius, get_drive
 
 main = Blueprint("main", __name__)
 
-@main.route("/")
+@main.route("/", methods=["GET"])
 def map():
     ispark_data = fetch_ispark_data()
     return render_template("index.html", ispark_data=ispark_data)
+
+
+@main.route("/api/ispark-data", methods=["GET"])
+def fetch_ispark_data_api():
+    try:
+        ispark_data = fetch_ispark_data()
+        return jsonify({"data": ispark_data})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @main.route("/nearest-parking", methods=["POST"])
