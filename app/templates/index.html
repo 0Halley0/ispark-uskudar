@@ -149,7 +149,7 @@
         const data = { lat: lat, lng: lng };
 
         try {
-          const response = await fetch("/nearest-parking", {
+          const response = await fetch("/api/nearest-parking", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -223,7 +223,7 @@
         };
 
         try {
-          const response = await fetch("/drive-info", {
+          const response = await fetch("/api/drive-info", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

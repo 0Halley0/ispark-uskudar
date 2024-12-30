@@ -9,7 +9,7 @@ from app.services import start_scheduler
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
     # db.init_app(app)
     from .routes import main
     app.register_blueprint(main)

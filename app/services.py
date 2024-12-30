@@ -59,7 +59,7 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def get_parking_within_radius(lat, lng, radius=5, limit=10):
+def get_parking_within_radius(lat, lng, radius=10, limit=30):
 
     cache_key = (round(lat, 4), round(lng, 4))
 

@@ -18,14 +18,14 @@ def fetch_ispark_data_api():
         return jsonify({"error": str(e)}), 500
 
 
-@main.route("/nearest-parking", methods=["POST"])
+@main.route("/api/nearest-parking", methods=["POST"])
 def get_parking_nearby():
     try:
         data = request.json
         user_lat = float(data.get("lat"))
         user_lng = float(data.get("lng"))
 
-        parking_lots = get_parking_within_radius(user_lat, user_lng, radius=5, limit=10)
+        parking_lots = get_parking_within_radius(user_lat, user_lng, radius=10, limit=30)
 
         return jsonify({"data": parking_lots})
 
@@ -33,7 +33,7 @@ def get_parking_nearby():
         return jsonify({"error": f"Invalid request: {str(e)}"}), 400
 
 
-@main.route("/drive-info", methods=["POST"])
+@main.route("/api/drive-info", methods=["POST"])
 def get_nav_info():
     try:
         data = request.json
