@@ -240,7 +240,7 @@
 
           const tableBody = document.getElementById("parking-table-body");
           tableBody.innerHTML = "";
-          responseData.enriched_parking_lots.forEach((park) => {
+          responseData.data.forEach((park) => {
             const row = document.createElement("tr");
             row.innerHTML = `
                         <td>${park.parkName}</td>

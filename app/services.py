@@ -59,7 +59,7 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def get_parking_within_radius(lat, lng, radius=10, limit=30):
+def get_parking_within_radius(lat, lng, radius=10, limit=20):
 
     cache_key = (round(lat, 4), round(lng, 4))
 
@@ -104,7 +104,7 @@ def get_parking_within_radius(lat, lng, radius=10, limit=30):
 
 
 def get_drive_info(lat, lng, parking_lots):
-    enriched_parking_lots = []
+    data = []
 
     for park in parking_lots:
         try:
@@ -120,7 +120,7 @@ def get_drive_info(lat, lng, parking_lots):
             drive_distance = None
             drive_time = None
 
-        enriched_parking_lots.append(
+        data.append(
             {
                 **park,
                 "driveDistance": drive_distance,
@@ -128,5 +128,5 @@ def get_drive_info(lat, lng, parking_lots):
             }
         )
 
-    return enriched_parking_lots
+    return data
 

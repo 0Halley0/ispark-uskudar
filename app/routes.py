@@ -25,7 +25,7 @@ def get_parking_nearby():
         user_lat = float(data.get("lat"))
         user_lng = float(data.get("lng"))
 
-        parking_lots = get_parking_within_radius(user_lat, user_lng, radius=10, limit=30)
+        parking_lots = get_parking_within_radius(user_lat, user_lng, radius=10, limit=20)
 
         return jsonify({"data": parking_lots})
 
@@ -43,7 +43,7 @@ def get_nav_info():
 
         enriched_lots = get_drive_info(user_lat, user_lng, parking_lots)
 
-        return jsonify({"enriched_parking_lots": enriched_lots})
+        return jsonify({"data": enriched_lots})
 
     except Exception as e:
         return jsonify({"error": f"Invalid request: {str(e)}"}), 400
