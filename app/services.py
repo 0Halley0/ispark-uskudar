@@ -3,7 +3,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import time
 from math import radians, sin, cos, sqrt, atan2
 import openrouteservice
-#from app.models import ParkingLot
+
+# from app.models import ParkingLot
 from config import Config
 import logging
 
@@ -130,3 +131,65 @@ def get_drive_info(lat, lng, parking_lots):
 
     return data
 
+
+def get_parking_statistics():
+    if not cached_ispark_data:
+        logger.error("No İSPARK data available.")
+        return {
+            "totalParkingLots": 0,
+            "totalCapacity": 0,
+            "totalEmptyCapacity": 0,
+            "districts": {},
+        }
+
+    total_parking_lots = 0
+    total_capacity = 0
+    total_empty_capacity = 0
+    district_stats = {}
+
+    for park in cached_ispark_data:
+        district = park.get("district", "Unknown")
+        capacity = int(park.get("capacity", 0))
+        empty_capacity = int(park.get("emptyCapacity", 0))
+
+        total_parking_lots += 1
+        total_capacity += capacity
+        total_empty_capacity += empty_capacity
+
+        if district not in district_stats:
+            district_stats[district] = {
+                "parkingLots": 0,
+                "capacity": 0,
+                "emptyCapacity": 0,
+            }
+
+        district_stats[district]["parkingLots"] += 1
+        district_stats[district]["capacity"] += capacity
+        district_stats[district]["emptyCapacity"] += empty_capacity
+
+    return {
+        "totalParkingLots": total_parking_lots,
+        "totalCapacity": total_capacity,
+        "totalEmptyCapacity": total_empty_capacity,
+        "districts": district_stats,
+    }
+
+
+def filter_parking_lots(empty_capacity=True, free_time=True):
+    if not cached_ispark_data:
+        logger.error("No İSPARK data available.")
+        return []
+
+    filtered_parking_lots = []
+
+    for park in cached_ispark_data:
+        if empty_capacity and int(park.get("emptyCapacity", 0)) <= 0:
+            continue
+
+        if free_time and int(park.get("freeTime", 0)) <= 0:
+            continue
+
+
+        filtered_parking_lots.append(park)
+
+    return filtered_parking_lots
