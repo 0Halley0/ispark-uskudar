@@ -2,7 +2,7 @@
 # CBS Yazılım Geliştirici Teknik Değerlendirme Ödevi
 
 Üsküdar'daki mevcut otoparkların durumunu gösteren ve en yakındaki otopark önerilerini sunan bir web uygulaması.
-
+> Web sitesini bu linkten kontrol edebilirsiniz: [ISPARK MAP UI](https://ispark-teknik-odev-frontend-9b78100911ff.herokuapp.com/)
 
 ## Özellikler
 
